@@ -1,8 +1,8 @@
 package cmd
 
 import (
+	"github.com/bugbundle/phantom/api"
 	"github.com/charmbracelet/log"
-	"github.com/import-benjamin/phantom/api"
 	"github.com/spf13/cobra"
 )
 

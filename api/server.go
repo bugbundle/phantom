@@ -4,9 +4,9 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/bugbundle/phantom/api/middlewares"
+	"github.com/bugbundle/phantom/api/routes"
 	"github.com/charmbracelet/log"
-	"github.com/import-benjamin/phantom/api/middlewares"
-	"github.com/import-benjamin/phantom/api/routes"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 

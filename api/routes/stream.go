@@ -9,8 +9,8 @@ import (
 	"net/textproto"
 	"time"
 
+	"github.com/bugbundle/phantom/api/utils"
 	"github.com/charmbracelet/log"
-	"github.com/import-benjamin/phantom/api/utils"
 	"gocv.io/x/gocv"
 )
 
@@ -18,16 +18,11 @@ import (
 func Homepage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/html")
 	template, err := template.ParseFiles("api/templates/index.html.tpl")
-	params := struct {
-		Addr string
-	}{
-		r.Host,
-	}
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	if err := template.Execute(w, params); err != nil {
+	if err := template.Execute(w, nil); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

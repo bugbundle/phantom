@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/import-benjamin/phantom/cmd"
+	"github.com/bugbundle/phantom/cmd"
 )
 
 func main() {
