@@ -4,13 +4,13 @@ import (
 	"fmt"
 	"html/template"
 	"image"
+	"log"
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
 	"time"
 
 	"github.com/bugbundle/phantom/api/utils"
-	"github.com/charmbracelet/log"
 	"gocv.io/x/gocv"
 )
 
@@ -28,20 +28,32 @@ func Homepage(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func StreamStatus(w http.ResponseWriter, r *http.Request) {
+	// If the camera is unavailable return 428
+	_, err := utils.GetCamera()
+	if err != nil {
+		w.Write([]byte("false"))
+		return
+	}
+	w.Write([]byte("true"))
+	return
+}
+
 // This function retrieve camera device and start streaming using multipart/x-mixed-replace
 // TODO: Add device number option
 func StreamVideo(w http.ResponseWriter, r *http.Request) {
 	// If the camera is unavailable return 428
 	webcam, err := utils.GetCamera()
 	if err != nil {
-		http.Error(w, "Camera unavailable.", http.StatusPreconditionRequired)
+		w.Header().Set("Content-Type", "application/json")
+		http.Error(w, "{\"reason\": \"webcam is not started\"}", http.StatusPreconditionRequired)
 		return
 	}
 
 	// Try to read the webcam
 	openErr := webcam.Open()
 	if openErr != nil {
-		log.Debug(fmt.Sprintf("Got the following error: %d", openErr), http.StatusServiceUnavailable)
+		log.Println("Got the following error:", openErr)
 	}
 
 	mimeWriter := multipart.NewWriter(w)
@@ -67,13 +79,13 @@ func StreamVideo(w http.ResponseWriter, r *http.Request) {
 
 		buf, err := gocv.IMEncode(gocv.JPEGFileExt, resizedFrame)
 		if err != nil {
-			log.Errorf("Error encoding frame: %v", err)
+			log.Println("Error encoding frame: ", err)
 			continue
 		}
 
 		partWriter, _ := mimeWriter.CreatePart(partHeader)
 		if _, err := partWriter.Write(buf.GetBytes()); err != nil {
-			log.Error("Error while processing buffer")
+			log.Println("Error while processing buffer")
 		}
 
 		// we want to record around 10 fps
@@ -89,10 +101,14 @@ func StreamVideo(w http.ResponseWriter, r *http.Request) {
 func CreateCamera(w http.ResponseWriter, r *http.Request) {
 	// Trigger singleton to instanciate camera
 	utils.CreateOrGetCamera()
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusCreated)
 }
 
 // Delete Camera using DELETE request
 // TODO: Add device number option
 func DeleteCamera(w http.ResponseWriter, r *http.Request) {
 	utils.DeleteCamera()
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
 }
