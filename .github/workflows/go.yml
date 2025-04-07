@@ -22,6 +22,11 @@ jobs:
       uses: actions/setup-go@v4
       with:
         go-version: '1.23'
+    - name: install prerequisites
+      run: |2-
+        sudo apt update -y
+        sudo apt install -y libopencv-dev
+        sudo dpkg -l libopencv-dev
 
     - name: Vet
       run: go vet -v ./...
