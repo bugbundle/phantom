@@ -6,7 +6,7 @@ require (
 	github.com/charmbracelet/log v0.4.1
 	github.com/spf13/cobra v1.9.1
 	go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp v0.60.0
-	gocv.io/x/gocv v0.40.0
+	gocv.io/x/gocv v0.41.0
 )
 
 require (
