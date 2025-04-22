@@ -11,6 +11,9 @@ on:
 
 permissions: read-all
 
+environment:
+  GOPATH: ${{ runner.temp }}/go
+
 jobs:
 
   build:
