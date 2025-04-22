@@ -27,6 +27,7 @@ jobs:
 
     - name: install prerequisites
       run: |2-
+        mkdir $GOPATH
         go get -u -d gocv.io/x/gocv
         cd $GOPATH/src/gocv.io/x/gocv
         make install
