@@ -11,12 +11,13 @@ on:
 
 permissions: read-all
 
-env:
-  GOPATH: ${{ runner.temp }}/go
-
 jobs:
 
   build:
+
+    env:
+      GOPATH: "${{ runner.temp }}/go"
+
     runs-on: ubuntu-24.04-arm
     steps:
     - uses: actions/checkout@v4
