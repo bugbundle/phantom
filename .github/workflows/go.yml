@@ -25,9 +25,9 @@ jobs:
 
     - name: install prerequisites
       run: |2-
-        sudo apt update -y
-        sudo apt install -y libopencv-dev
-        sudo dpkg -l libopencv-dev
+        go get -u -d gocv.io/x/gocv
+        cd $GOPATH/src/gocv.io/x/gocv
+        make install
 
     - name: Vet
       run: go vet -v ./...
