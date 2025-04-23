@@ -19,32 +19,12 @@ jobs:
     runs-on: ubuntu-24.04-arm
     steps:
     - uses: actions/checkout@v4
-
-    - name: Set up Go
-      uses: actions/setup-go@v4
+    - name: Buildah Action
+      uses: redhat-actions/buildah-build@v2
       with:
-        go-version: '1.23'
+        image: phantom
+        tags: ${{ github.sha }}
+        containerfiles: |
+          ./Containerfile
+        build-args: |
 
-    - name: install prerequisites
-      run: |2-
-        mkdir $GOPATH
-        go get -u -d gocv.io/x/gocv
-        cd $GOPATH/pkg/mod/gocv.io/x/gocv@v0.41.0/
-        make install
-      env:
-        GOPATH: "${{ runner.temp }}/go"
-
-    - name: Vet
-      run: go vet -v ./...
-      env:
-        GOPATH: "${{ runner.temp }}/go"
-
-    - name: Build
-      run: go build -v ./...
-      env:
-        GOPATH: "${{ runner.temp }}/go"
-
-    - name: Test
-      run: go test -v ./...
-      env:
-        GOPATH: "${{ runner.temp }}/go"

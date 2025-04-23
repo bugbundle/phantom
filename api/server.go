@@ -7,7 +7,6 @@ import (
 
 	"github.com/bugbundle/phantom/api/middlewares"
 	"github.com/bugbundle/phantom/api/routes"
-	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 )
 
 func Server(addr string) {
@@ -25,11 +24,8 @@ func Server(addr string) {
 
 	server_config := &http.Server{
 		Addr: addr,
-		Handler: otelhttp.NewHandler(
-			middlewares.LoggingHandler(
-				middlewares.Recovery(router),
-			),
-			"",
+		Handler: middlewares.LoggingHandler(
+			middlewares.Recovery(router),
 		),
 	}
 

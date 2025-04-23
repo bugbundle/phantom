@@ -1,8 +1,9 @@
 package cmd
 
 import (
+	"log"
+
 	"github.com/bugbundle/phantom/api"
-	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 )
 
@@ -17,7 +18,7 @@ var serverCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		addr, err := cmd.Flags().GetString("addr")
 		if err != nil {
-			log.Fatal("Can't retrieve addr flag.")
+			log.Printf("Can't retrieve addr flag.")
 		}
 		api.Server(addr)
 	},
