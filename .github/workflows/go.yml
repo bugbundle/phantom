@@ -26,5 +26,10 @@ jobs:
         tags: ${{ github.sha }}
         containerfiles: |
           ./Containerfile
-        build-args: |
+        extra-args: |
+          --target=build
+    - name: Run go vet
+      run: podman run phantom:${{ github.sha }} go vet -v ./...
+    - name: Run go test
+      run: podman run phantom:${{ github.sha }} go test -v ./...
 
