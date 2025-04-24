@@ -1,4 +1,4 @@
-package routes
+package http
 
 import (
 	"fmt"
@@ -17,7 +17,7 @@ import (
 // Return default Homepage, a simple alpineJS application to users
 func Homepage(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "text/html")
-	template, err := template.ParseFiles("api/templates/index.html.tpl")
+	template, err := template.ParseFiles("templates/index.html.tpl")
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
@@ -36,7 +36,6 @@ func StreamStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.Write([]byte("true"))
-	return
 }
 
 // This function retrieve camera device and start streaming using multipart/x-mixed-replace
