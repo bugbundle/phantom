@@ -10,7 +10,7 @@ import (
 	"net/textproto"
 	"time"
 
-	"github.com/bugbundle/phantom/api/utils"
+	"github.com/bugbundle/phantom/internal/port/camera"
 	"gocv.io/x/gocv"
 )
 
@@ -30,7 +30,7 @@ func Homepage(w http.ResponseWriter, r *http.Request) {
 
 func StreamStatus(w http.ResponseWriter, r *http.Request) {
 	// If the camera is unavailable return 428
-	_, err := utils.GetCamera()
+	_, err := camera.GetCamera()
 	if err != nil {
 		w.Write([]byte("false"))
 		return
@@ -42,7 +42,7 @@ func StreamStatus(w http.ResponseWriter, r *http.Request) {
 // TODO: Add device number option
 func StreamVideo(w http.ResponseWriter, r *http.Request) {
 	// If the camera is unavailable return 428
-	webcam, err := utils.GetCamera()
+	webcam, err := camera.GetCamera()
 	if err != nil {
 		w.Header().Set("Content-Type", "application/json")
 		http.Error(w, "{\"reason\": \"webcam is not started\"}", http.StatusPreconditionRequired)
@@ -99,7 +99,7 @@ func StreamVideo(w http.ResponseWriter, r *http.Request) {
 // TODO: Add device number option
 func CreateCamera(w http.ResponseWriter, r *http.Request) {
 	// Trigger singleton to instanciate camera
-	utils.CreateOrGetCamera()
+	camera.CreateOrGetCamera()
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 }
@@ -107,7 +107,7 @@ func CreateCamera(w http.ResponseWriter, r *http.Request) {
 // Delete Camera using DELETE request
 // TODO: Add device number option
 func DeleteCamera(w http.ResponseWriter, r *http.Request) {
-	utils.DeleteCamera()
+	camera.DeleteCamera()
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 }

@@ -5,10 +5,26 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/bugbundle/phantom/api/middlewares"
 	"github.com/bugbundle/phantom/internal/adapter/logger"
 	httpRoutes "github.com/bugbundle/phantom/internal/app/http"
 )
+
+func Recovery(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			err := recover()
+			if err != nil {
+				slog.Error(fmt.Sprint(err))
+
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusInternalServerError)
+				w.Write([]byte("{\"error\": \"Internal Server Error\"}"))
+			}
+		}()
+
+		next.ServeHTTP(w, r)
+	})
+}
 
 func Server(addr string) {
 	fmt.Println("here")
@@ -24,7 +40,7 @@ func Server(addr string) {
 	server_config := &http.Server{
 		Addr: addr,
 		Handler: logger.LoggingHandler(
-			middlewares.Recovery(router),
+			Recovery(router),
 		),
 	}
 
