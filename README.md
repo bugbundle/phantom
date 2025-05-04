@@ -10,9 +10,20 @@ stream video from usb device over the web
 In order to install opencv4 you can either rely on your system package manager or compile it directly using:
 
 ```bash
-pushd $GOPATH/gocv.io/x/gocv
+cd $GOPATH/gocv.io/x/gocv
 make install
-popd
 ```
 
+## Getting started
 
+Build the container
+
+```bash
+podman build -t phantom:$(git describe) .
+```
+
+Run the container
+
+```bash
+podman run --device /dev/video0 -p 8080:8080 localhost/phantom:$(git describe) /app/main
+```

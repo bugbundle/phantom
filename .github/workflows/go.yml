@@ -14,22 +14,20 @@ permissions: read-all
 jobs:
 
   build:
-
-
     runs-on: ubuntu-24.04-arm
     steps:
     - uses: actions/checkout@v4
     - name: Buildah Action
       uses: redhat-actions/buildah-build@v2
       with:
-        image: phantom
+        image: ghcr.io/${{ github.repository }}
         tags: ${{ github.sha }}
         containerfiles: |
           ./Containerfile
         extra-args: |
           --target=build
     - name: Run go vet
-      run: podman run phantom:${{ github.sha }} go vet -v ./...
+      run: podman run ghcr.io/${{ github.repository }}:${{ github.sha }} go vet -v ./...
     - name: Run go test
-      run: podman run phantom:${{ github.sha }} go test -v ./...
+      run: podman run ghcr.io/${{ github.repository }}:${{ github.sha }} go test -v ./...
 

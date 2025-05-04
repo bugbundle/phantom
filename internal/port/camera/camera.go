@@ -1,4 +1,4 @@
-package utils
+package camera
 
 import (
 	"errors"
@@ -7,11 +7,24 @@ import (
 	"gocv.io/x/gocv"
 )
 
+type WebCamSingleton struct {
+	Capture *gocv.VideoCapture
+	isOpen  bool
+}
+
 var instance *WebCamSingleton
 
-type WebCamSingleton struct {
-	capture *gocv.VideoCapture
-	isOpen  bool
+// CaptureImage captures an image from the webcam and returns it.
+func (wc *WebCamSingleton) CaptureImage() (*gocv.Mat, error) {
+	if !wc.IsOpen() {
+		return nil, fmt.Errorf("webcam is not open")
+	}
+
+	img := gocv.NewMat()
+	if ok := wc.Capture.Read(&img); !ok {
+		return nil, fmt.Errorf("failed to read image from webcam")
+	}
+	return &img, nil
 }
 
 func GetCamera() (*WebCamSingleton, error) {
@@ -54,7 +67,7 @@ func (wc *WebCamSingleton) Open() error {
 		return fmt.Errorf("error opening video capture device: %v", err)
 	}
 
-	wc.capture = capture
+	wc.Capture = capture
 	wc.isOpen = true
 	return nil
 }
@@ -66,19 +79,6 @@ func (wc *WebCamSingleton) Stop() {
 		return
 	}
 
-	wc.capture.Close()
+	wc.Capture.Close()
 	wc.isOpen = false
-}
-
-// CaptureImage captures an image from the webcam and returns it.
-func (wc *WebCamSingleton) CaptureImage() (*gocv.Mat, error) {
-	if !wc.isOpen {
-		return nil, fmt.Errorf("webcam is not open")
-	}
-
-	img := gocv.NewMat()
-	if ok := wc.capture.Read(&img); !ok {
-		return nil, fmt.Errorf("failed to read image from webcam")
-	}
-	return &img, nil
 }
