@@ -27,7 +27,6 @@ func Recovery(next http.Handler) http.Handler {
 }
 
 func Server(addr string) {
-	fmt.Println("here")
 	router := http.NewServeMux()
 
 	router.HandleFunc("/", httpRoutes.Homepage)
@@ -35,8 +34,8 @@ func Server(addr string) {
 	router.HandleFunc("GET /cameras/status", httpRoutes.StreamStatus)
 	router.HandleFunc("DELETE /cameras", httpRoutes.DeleteCamera)
 	router.HandleFunc("GET /cameras", httpRoutes.StreamVideo)
+	router.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
-	fmt.Println("hore")
 	server_config := &http.Server{
 		Addr: addr,
 		Handler: logger.LoggingHandler(
