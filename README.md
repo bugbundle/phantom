@@ -5,9 +5,9 @@ It is about turning an old Raspberry Pi, with a video device (USB, PCI, etc.), i
 
 ```mermaid
 architecture-beta
-    group vpn(cloud)[Private network (using vpn like tailscale)]
+    group vpn(cloud)[Private network]
     service api(server)[api] in vpn
-    service disk1(disk)[Storage] in api
+    service disk1(disk)[Storage] in vpn
     disk1:T -- B:api
 ```
 
