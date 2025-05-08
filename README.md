@@ -1,6 +1,17 @@
 # phantom
 
-stream video from usb device over the web
+Stream video from usb device over the web.
+It is about turning an old Raspberry Pi, with a video device (USB, PCI, etc.), into a home camera.
+
+```mermaid
+architecture-beta
+    group vpn(cloud)[Private network (using vpn like tailscale)]
+    service api(server)[api] in vpn
+    service disk1(disk)[Storage] in api
+    disk1:T -- B:api
+```
+
+Once installed, you should be able to connect to your server through your VPN and stream from your video device.
 
 ## prerequisite
 
