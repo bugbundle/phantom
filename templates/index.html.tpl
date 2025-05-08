@@ -11,7 +11,7 @@
     <a>Phantom</a>
   </nav>
   <main>
-      <img src="cameras" style='width: 640px; height: 360px;'/>
+      <img src="cameras" style='width: 640px; height: 360px;' alt=""/>
       <div>
         <button onclick="createCamera()">start</button>
         <button onclick="deleteCamera()">stop</button>
