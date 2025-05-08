@@ -6,9 +6,15 @@ It is about turning an old Raspberry Pi, with a video device (USB, PCI, etc.), i
 ```mermaid
 architecture-beta
     group vpn(cloud)[Private network]
+    junction disksplit
+
     service api(server)[api] in vpn
-    service disk1(disk)[Storage] in vpn
-    disk1:T -- B:api
+    service os(disk)[System Storage] in vpn
+    service storage(disk)[Video Storage] in vpn
+
+    api:R -- L:disksplit
+    os:B -- T:disksplit
+    storage:T -- B:disksplit
 ```
 
 Once installed, you should be able to connect to your server through your VPN and stream from your video device.
