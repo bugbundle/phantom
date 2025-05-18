@@ -2,19 +2,28 @@ package http
 
 import (
 	"fmt"
-	"log/slog"
+	"log"
 	"net/http"
 
+	"github.com/bugbundle/phantom/internal/adapter/http/controls"
+	"github.com/bugbundle/phantom/internal/adapter/http/front"
 	"github.com/bugbundle/phantom/internal/adapter/logger"
-	httpRoutes "github.com/bugbundle/phantom/internal/app/http"
 )
 
-func Recovery(next http.Handler) http.Handler {
+type service struct {
+	config config
+}
+
+type config struct {
+	addr string
+}
+
+func panicHandler(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			err := recover()
 			if err != nil {
-				slog.Error(fmt.Sprint(err))
+				log.Print(fmt.Errorf("an error occured:\n%w\n", err))
 
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusInternalServerError)
@@ -26,25 +35,27 @@ func Recovery(next http.Handler) http.Handler {
 	})
 }
 
-func Server(addr string) {
+func NewService(addr string) *service {
+	return &service{
+		config: config{
+			addr: addr,
+		},
+	}
+}
+
+func (svc *service) Run() error {
 	router := http.NewServeMux()
+	controls.RegisterRoutes(router)
+	front.RegisterRoutes(router)
 
-	router.HandleFunc("/", httpRoutes.Homepage)
-	router.HandleFunc("POST /cameras", httpRoutes.CreateCamera)
-	router.HandleFunc("GET /cameras/status", httpRoutes.StreamStatus)
-	router.HandleFunc("DELETE /cameras", httpRoutes.DeleteCamera)
-	router.HandleFunc("GET /cameras", httpRoutes.StreamVideo)
-	router.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-
-	server_config := &http.Server{
-		Addr: addr,
+	serverConfig := &http.Server{
+		Addr: svc.config.addr,
 		Handler: logger.LoggingHandler(
-			Recovery(router),
+			panicHandler(router),
 		),
 	}
-
-	slog.Info("Starting server...", "interface", addr)
-	if err := server_config.ListenAndServe(); err != nil {
-		slog.Error("An error occured !", "interface", addr, "error", err)
+	if err := serverConfig.ListenAndServe(); err != nil {
+		return fmt.Errorf("an error occured while starting the server.\n%w", err)
 	}
+	return nil
 }
