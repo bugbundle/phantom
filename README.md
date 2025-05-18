@@ -1,3 +1,5 @@
+Latest pipeline run: [![Go](https://github.com/bugbundle/phantom/actions/workflows/go.yml/badge.svg)](https://github.com/bugbundle/phantom/actions/workflows/go.yml)
+
 # phantom
 
 Stream video from usb device over the web.
