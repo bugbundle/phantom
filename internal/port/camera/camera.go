@@ -1,84 +1,70 @@
 package camera
 
 import (
-	"errors"
 	"fmt"
+	"sync"
 
+	"github.com/bugbundle/phantom/internal/adapter/camera"
 	"gocv.io/x/gocv"
 )
 
-type WebCamSingleton struct {
-	Capture *gocv.VideoCapture
+type webCamSingleton struct {
+	capture *gocv.VideoCapture
 	isOpen  bool
+	mu      sync.Mutex
 }
 
-var instance *WebCamSingleton
+var (
+	instance *webCamSingleton
+	once     sync.Once
+)
 
 // CaptureImage captures an image from the webcam and returns it.
-func (wc *WebCamSingleton) CaptureImage() (*gocv.Mat, error) {
-	if !wc.IsOpen() {
-		return nil, fmt.Errorf("webcam is not open")
+func (w *webCamSingleton) CaptureImage() (*gocv.Mat, error) {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	if !w.isOpen {
+		return nil, fmt.Errorf("webcam unavailable")
 	}
-
 	img := gocv.NewMat()
-	if ok := wc.Capture.Read(&img); !ok {
-		return nil, fmt.Errorf("failed to read image from webcam")
+	if ok := w.capture.Read(&img); !ok {
+		return nil, fmt.Errorf("failed to capture image")
 	}
 	return &img, nil
 }
 
-func GetCamera() (*WebCamSingleton, error) {
-	if instance != nil {
-		return instance, nil
-	}
-	return nil, errors.New("camera is missing")
-}
-
-func CreateOrGetCamera() *WebCamSingleton {
-	if instance == nil {
-		instance = &WebCamSingleton{}
-	}
+func GetInstance() camera.CameraService {
+	once.Do(func() {
+		instance = &webCamSingleton{}
+	})
 	return instance
 }
 
-func DeleteCamera() error {
-	if instance == nil {
-		return nil
+// Open opens the webcam if not already open.
+func (w *webCamSingleton) Open() error {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	if w.isOpen {
+		return fmt.Errorf("webcam already open")
 	}
-
-	instance.Stop()
-	instance = nil
-
-	return nil
-}
-
-func (wc *WebCamSingleton) IsOpen() bool {
-	return wc.isOpen
-}
-
-// Open starts the webcam capture.
-func (wc *WebCamSingleton) Open() error {
-	if wc.isOpen {
-		return fmt.Errorf("webcam is already open")
-	}
-
-	capture, err := gocv.OpenVideoCapture(0) // Use 0 for default webcam
+	capture, err := gocv.OpenVideoCapture(0)
 	if err != nil {
-		return fmt.Errorf("error opening video capture device: %v", err)
+		return fmt.Errorf("error opening webcam: %v", err)
 	}
-
-	wc.Capture = capture
-	wc.isOpen = true
+	w.capture = capture
+	w.isOpen = true
 	return nil
 }
 
-// Stop stops the webcam capture.
-func (wc *WebCamSingleton) Stop() {
-	if !wc.isOpen {
-		fmt.Println("webcam is not open")
-		return
+// Close closes the webcam and releases the resource.
+func (w *webCamSingleton) Close() error {
+	w.mu.Lock()
+	defer w.mu.Unlock()
+	if w.isOpen && w.capture != nil {
+		w.capture.Close()
+		w.isOpen = false
+		w.capture = nil
 	}
-
-	wc.Capture.Close()
-	wc.isOpen = false
+	// TODO: Add error management later
+	return nil
 }

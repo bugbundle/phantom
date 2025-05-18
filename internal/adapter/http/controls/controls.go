@@ -16,49 +16,31 @@ import (
 func RegisterRoutes(router *http.ServeMux) {
 	router.HandleFunc("POST /cameras", startCameraHandler)
 	router.HandleFunc("DELETE /cameras", stopCameraHandler)
-	router.HandleFunc("GET /cameras/status", StreamStatus)
-	router.HandleFunc("GET /cameras", StreamVideo)
+	router.HandleFunc("GET /cameras", StreamVideoHandler)
 }
 
+// If not yet, create a camera entity
 func startCameraHandler(w http.ResponseWriter, _ *http.Request) {
 	// Trigger singleton to instanciate camera
-	camera.CreateOrGetCamera()
+	device := camera.GetInstance()
+	device.Open()
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 }
 
+// If existing, remove a camera entity
 func stopCameraHandler(w http.ResponseWriter, r *http.Request) {
-	camera.DeleteCamera()
+	device := camera.GetInstance()
+	device.Close()
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 }
 
-func StreamStatus(w http.ResponseWriter, r *http.Request) {
-	// If the camera is unavailable return 428
-	_, err := camera.GetCamera()
-	if err != nil {
-		w.Write([]byte("false"))
-		return
-	}
-	w.Write([]byte("true"))
-}
-
 // This function retrieve camera device and start streaming using multipart/x-mixed-replace
 // TODO: Add device number option
-func StreamVideo(w http.ResponseWriter, r *http.Request) {
+func StreamVideoHandler(w http.ResponseWriter, r *http.Request) {
 	// If the camera is unavailable return 428
-	webcam, err := camera.GetCamera()
-	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		http.Error(w, "{\"reason\": \"webcam is not started\"}", http.StatusPreconditionRequired)
-		return
-	}
-
-	// Try to read the webcam
-	openErr := webcam.Open()
-	if openErr != nil {
-		log.Println("Got the following error:", openErr)
-	}
+	webcam := camera.GetInstance()
 
 	mimeWriter := multipart.NewWriter(w)
 	w.Header().Set("Content-Type", fmt.Sprintf("multipart/x-mixed-replace; boundary=%s", mimeWriter.Boundary()))
@@ -66,16 +48,11 @@ func StreamVideo(w http.ResponseWriter, r *http.Request) {
 	partHeader.Add("Content-Type", "image/jpeg")
 
 	for {
-		if !webcam.IsOpen() {
-			http.Error(w, "Missing camera", http.StatusServiceUnavailable)
-			return
-		}
-
 		img, err := webcam.CaptureImage()
 		if err != nil {
 			http.Error(w, "Error capturing image: %v", http.StatusServiceUnavailable)
 		}
-		defer img.Close()
+		// defer img.Close()
 
 		resizedFrame := gocv.NewMat()
 
