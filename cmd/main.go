@@ -5,5 +5,6 @@ import (
 )
 
 func main() {
-	http.Server("0.0.0.0:8080")
+	svc := http.NewService("127.0.0.1:8080")
+	svc.Run()
 }
