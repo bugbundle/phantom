@@ -7,6 +7,7 @@ import (
 	"mime/multipart"
 	"net/http"
 	"net/textproto"
+	"strconv"
 	"time"
 
 	"github.com/bugbundle/phantom/internal/port/camera"
@@ -14,16 +15,20 @@ import (
 )
 
 func RegisterRoutes(router *http.ServeMux) {
-	router.HandleFunc("POST /cameras", startCameraHandler)
+	router.HandleFunc("POST /cameras/{deviceId}", startCameraHandler)
 	router.HandleFunc("DELETE /cameras", stopCameraHandler)
 	router.HandleFunc("GET /cameras", StreamVideoHandler)
 }
 
 // If not yet, create a camera entity
-func startCameraHandler(w http.ResponseWriter, _ *http.Request) {
+func startCameraHandler(w http.ResponseWriter, r *http.Request) {
+	g, err := strconv.Atoi(r.PathValue("deviceId"))
+	if err != nil {
+		http.Error(w, "Invalid deviceId", http.StatusNotFound)
+	}
 	// Trigger singleton to instanciate camera
 	device := camera.GetInstance()
-	device.Open()
+	device.Open(g)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 }
