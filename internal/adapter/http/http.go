@@ -23,7 +23,7 @@ func panicHandler(next http.Handler) http.Handler {
 		defer func() {
 			err := recover()
 			if err != nil {
-				log.Print(fmt.Errorf("an error occured:\n%w\n", err))
+				log.Print(fmt.Errorf("an error occured:\n%s", err))
 
 				w.Header().Set("Content-Type", "application/json")
 				w.WriteHeader(http.StatusInternalServerError)
