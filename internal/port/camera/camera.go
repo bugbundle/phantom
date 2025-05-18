@@ -41,13 +41,13 @@ func GetInstance() camera.CameraService {
 }
 
 // Open opens the webcam if not already open.
-func (w *webCamSingleton) Open() error {
+func (w *webCamSingleton) Open(deviceId int) error {
 	w.mu.Lock()
 	defer w.mu.Unlock()
 	if w.isOpen {
 		return fmt.Errorf("webcam already open")
 	}
-	capture, err := gocv.OpenVideoCapture(0)
+	capture, err := gocv.OpenVideoCapture(deviceId)
 	if err != nil {
 		return fmt.Errorf("error opening webcam: %v", err)
 	}

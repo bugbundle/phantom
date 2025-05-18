@@ -19,7 +19,7 @@
   </main>
   <script>
     async function createCamera() {
-      await fetch('/cameras', {method: 'POST'});
+      await fetch('/cameras/0', {method: 'POST'});
       location.reload();
     };
     async function deleteCamera() {
