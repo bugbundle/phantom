@@ -8,4 +8,4 @@ FROM docker.io/alpine:3.21 AS delivery
 WORKDIR /app
 RUN apk add musl opencv-dev icu-libs --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community
 COPY --from=build /app/main /app/main
-COPY --from=build /app/api/templates /app/api/templates
+COPY --from=build /app/templates /app/templates
