@@ -6,13 +6,13 @@ name: Go
 on:
   push:
     branches: [ "main" ]
+    tags: ["V*.*.*"]
   pull_request:
     branches: [ "main" ]
 
 permissions: read-all
 
 jobs:
-
   build:
     runs-on: ubuntu-24.04-arm
     steps:
@@ -21,7 +21,7 @@ jobs:
       uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056
       with:
         image: ghcr.io/${{ github.repository }}
-        tags: ${{ github.sha }}
+        tags: ${{ github.ref_name }}
         containerfiles: |
           ./Containerfile
         extra-args: |
@@ -31,3 +31,29 @@ jobs:
     - name: Run go test
       run: podman run ghcr.io/${{ github.repository }}:${{ github.sha }} go test -v ./...
 
+    - name: Buildah Action
+      # Push events mean either a tag or main branch
+      if: github.event_name == 'push'
+      uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056
+      with:
+        image: ghcr.io/${{ github.repository }}
+        tags: ${{ github.ref_name }}
+        containerfiles: |
+          ./Containerfile
+        extra-args: |
+          --target=delivery
+
+    # Push the image to GHCR (Image Registry)
+    - name: Push To GHCR
+      # Push events mean either a tag or main branch
+      if: github.event_name == 'push'
+      uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c  # v2.8
+      id: push
+      with:
+        image: ${{ steps.build_image.outputs.image }}
+        tags: ${{ steps.build_image.outputs.tags }}
+        registry: ghcr.io/${{ github.repository }}
+        username: ${{ github.actor }}
+        password: ${{ github.token }}
+        extra-args: |
+          --disable-content-trust
