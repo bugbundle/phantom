@@ -20,23 +20,23 @@ jobs:
     - name: Buildah Action
       uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056
       with:
-        image: ${{ github.repository }}
+        image: phantom
         tags: ${{ github.event_type == 'push' && github.ref_name || github.sha }}
         containerfiles: |
           ./Containerfile
         extra-args: |
           --target=build
     - name: Run go vet
-      run: podman run ${{ github.repository }}:${{ github.sha }} go vet -v ./...
+      run: podman run phantom:${{ github.sha }} go vet -v ./...
     - name: Run go test
-      run: podman run ${{ github.repository }}:${{ github.sha }} go test -v ./...
+      run: podman run phantom:${{ github.sha }} go test -v ./...
 
     - name: Buildah Action
       # Push events mean either a tag or main branch
       if: github.event_name == 'push'
       uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056
       with:
-        image: ${{ github.repository }}
+        image: phantom
         tags: ${{ github.ref_name }}
         containerfiles: |
           ./Containerfile
@@ -50,9 +50,9 @@ jobs:
       uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c  # v2.8
       id: push
       with:
-        image: ${{ github.repository }}
+        image: phantom
         tags: ${{ github.ref_name }}
-        registry: ghcr.io
+        registry: ghcr.io/bugbundle
         username: ${{ github.actor }}
         password: ${{ github.token }}
         extra-args: |
