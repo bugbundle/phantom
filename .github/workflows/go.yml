@@ -20,7 +20,7 @@ jobs:
     - name: Buildah Action
       uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056
       with:
-        image: ghcr.io/${{ github.repository }}
+        image: ${{ github.repository }}
         tags: ${{ github.event_type == 'push' && github.ref_name || github.sha }}
         containerfiles: |
           ./Containerfile
@@ -36,7 +36,7 @@ jobs:
       if: github.event_name == 'push'
       uses: redhat-actions/buildah-build@7a95fa7ee0f02d552a32753e7414641a04307056
       with:
-        image: ghcr.io/${{ github.repository }}
+        image: ${{ github.repository }}
         tags: ${{ github.ref_name }}
         containerfiles: |
           ./Containerfile
@@ -50,9 +50,9 @@ jobs:
       uses: redhat-actions/push-to-registry@5ed88d269cf581ea9ef6dd6806d01562096bee9c  # v2.8
       id: push
       with:
-        image: ghcr.io/${{ github.repository }}
+        image: ${{ github.repository }}
         tags: ${{ github.ref_name }}
-        registry: ghcr.io/${{ github.repository }}
+        registry: ghcr.io
         username: ${{ github.actor }}
         password: ${{ github.token }}
         extra-args: |
