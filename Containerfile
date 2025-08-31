@@ -1,9 +1,7 @@
-FROM ghcr.io/hybridgroup/opencv:4.12.0 AS artifacts
+FROM ghcr.io/hybridgroup/opencv:4.11.0 AS artifacts
 
 ENV GOPATH=/go
 ENV PATH=$PATH:$GOPATH/bin:/usr/local/go/bin
-
-RUN apt update && apt install -y libtbb-dev
 
 WORKDIR /app
 COPY go.mod go.mod
