@@ -1,11 +1,11 @@
-FROM docker.io/golang:1.24.5-alpine3.22 AS build
-WORKDIR /app
-COPY . .
-RUN apk add g++ binutils make libc-dev patch opencv-dev icu-libs
-RUN go build -ldflags "-w -s" cmd/main.go
+FROM ghcr.io/hybridgroup/opencv:4.12.0 AS artifacts
 
-FROM docker.io/alpine:3.22 AS delivery
+ENV GOPATH=/go
+ENV PATH=$PATH:$GOPATH/bin:/usr/local/go/bin
+
 WORKDIR /app
-RUN apk add musl opencv icu-libs
-COPY --from=build /app/main /app/main
-COPY --from=build /app/templates /app/templates
+COPY go.mod go.mod
+RUN go mod download
+
+COPY . .
+RUN go build -v -x -ldflags "-w -s" -o main cmd/main.go
