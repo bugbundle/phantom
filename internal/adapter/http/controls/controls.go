@@ -57,7 +57,6 @@ func StreamVideoHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			http.Error(w, "Error capturing image: %v", http.StatusServiceUnavailable)
 		}
-		// defer img.Close()
 
 		resizedFrame := gocv.NewMat()
 
@@ -73,7 +72,10 @@ func StreamVideoHandler(w http.ResponseWriter, r *http.Request) {
 		if _, err := partWriter.Write(buf.GetBytes()); err != nil {
 			log.Println("Error while processing buffer")
 		}
-
+		
+		buf.Close()
+		resizedFrame.Close()
+		img.Close()
 		// we want to record around 10 fps
 		// this mean every second send 10 images
 		// Let's assume reading, encoding and  writing do not consume any resources
