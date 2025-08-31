@@ -1,4 +1,4 @@
-FROM ghcr.io/hybridgroup/opencv:4.10.0 AS artifacts
+FROM ghcr.io/hybridgroup/opencv:4.11.0-ubuntu-24.04 AS artifacts
 
 ENV GOPATH=/go
 ENV PATH=$PATH:$GOPATH/bin:/usr/local/go/bin
