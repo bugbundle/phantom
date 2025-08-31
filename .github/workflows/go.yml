@@ -42,8 +42,6 @@ jobs:
         tags: ${{ github.ref_name }}
         containerfiles: |
           ./Containerfile
-        extra-args: |
-          --target=delivery
 
     # Push the image to GHCR (Image Registry)
     - name: Push To GHCR
